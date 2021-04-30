@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mage.cards.s;
 
 import java.util.UUID;
@@ -72,7 +67,7 @@ class SkyshipWeatherlightEffect extends SearchEffect {
     public SkyshipWeatherlightEffect() {
 
         super(new TargetCardInLibrary(0, Integer.MAX_VALUE, filter), Outcome.Neutral);
-        this.staticText = "search your library for any number of artifact and/or creature cards and exile them. Then shuffle your library";
+        this.staticText = "search your library for any number of artifact and/or creature cards and exile them. Then shuffle";
 
     }
 

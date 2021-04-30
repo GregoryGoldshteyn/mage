@@ -15,10 +15,9 @@ import mage.constants.Outcome;
 import mage.constants.SubType;
 import mage.constants.Zone;
 import mage.filter.FilterCard;
-import mage.filter.predicate.other.AuraCardCanAttachToPermanentId;
+import mage.filter.predicate.card.AuraCardCanAttachToPermanentId;
 import mage.game.Game;
 import mage.game.events.GameEvent;
-import mage.game.events.GameEvent.EventType;
 import mage.game.permanent.Permanent;
 import mage.players.Player;
 import mage.target.common.TargetCardInLibrary;
@@ -95,7 +94,7 @@ class SovereignsOfLostAlaraEffect extends OneShotEffect {
 
     public SovereignsOfLostAlaraEffect() {
         super(Outcome.BoostCreature);
-        staticText = "you may search your library for an Aura card that could enchant that creature, put it onto the battlefield attached to that creature, then shuffle your library";
+        staticText = "you may search your library for an Aura card that could enchant that creature, put it onto the battlefield attached to that creature, then shuffle";
     }
 
     public SovereignsOfLostAlaraEffect(final SovereignsOfLostAlaraEffect effect) {

@@ -18,7 +18,7 @@ import mage.constants.*;
 import mage.counters.CounterType;
 import mage.filter.FilterCard;
 import mage.filter.common.FilterCreatureCard;
-import mage.filter.predicate.mageobject.ConvertedManaCostPredicate;
+import mage.filter.predicate.mageobject.ManaValuePredicate;
 import mage.game.Game;
 import mage.game.events.GameEvent;
 import mage.game.permanent.Permanent;
@@ -27,6 +27,7 @@ import mage.game.permanent.token.Token;
 import mage.game.stack.Spell;
 import mage.players.Player;
 import mage.target.common.TargetCardInLibrary;
+
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
@@ -51,7 +52,7 @@ public final class VivienMonstersAdvocate extends CardImpl {
         this.addAbility(new SimpleStaticAbility(new LookAtTopCardOfLibraryAnyTimeEffect()));
 
         // You may cast creature spells from the top of your library.
-        this.addAbility(new SimpleStaticAbility(new PlayTheTopCardEffect(filter)));
+        this.addAbility(new SimpleStaticAbility(new PlayTheTopCardEffect(filter, false)));
 
         // +1: Create a 3/3 green Beast creature token. Put your choice of a vigilance 
         // counter, a reach counter, or a trample counter on it.
@@ -141,9 +142,9 @@ class VivienMonstersAdvocateTriggeredAbility extends DelayedTriggeredAbility {
         Spell spell = game.getSpell(event.getTargetId());
         if (spell != null
                 && spell.isCreature()) {
-            int cmc = spell.getConvertedManaCost();
-            FilterCard filter = new FilterCreatureCard("creature card with converted mana cost less than " + cmc);
-            filter.add(new ConvertedManaCostPredicate(ComparisonType.FEWER_THAN, cmc));
+            int cmc = spell.getManaValue();
+            FilterCard filter = new FilterCreatureCard("creature card with mana value less than " + cmc);
+            filter.add(new ManaValuePredicate(ComparisonType.FEWER_THAN, cmc));
             this.getEffects().clear();
             this.getEffects().add(new SearchLibraryPutInPlayEffect(new TargetCardInLibrary(filter)));
             return true;
@@ -159,7 +160,7 @@ class VivienMonstersAdvocateTriggeredAbility extends DelayedTriggeredAbility {
     @Override
     public String getRule() {
         return "When you cast your next creature spell this turn, "
-                + "search your library for a creature card with lesser converted mana cost, "
-                + "put it onto the battlefield, then shuffle your library.";
+                + "search your library for a creature card with lesser mana value, "
+                + "put it onto the battlefield, then shuffle.";
     }
 }

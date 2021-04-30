@@ -15,10 +15,11 @@ import mage.filter.FilterCard;
 import mage.filter.common.FilterControlledPermanent;
 import mage.filter.common.FilterEnchantmentPermanent;
 import mage.filter.predicate.Predicates;
-import mage.filter.predicate.permanent.AnotherPredicate;
+import mage.filter.predicate.mageobject.AnotherPredicate;
 import mage.game.Game;
 import mage.game.permanent.Permanent;
 import mage.target.common.TargetCardInGraveyard;
+import mage.target.common.TargetCardInYourGraveyard;
 
 /**
  *
@@ -28,7 +29,7 @@ public final class StarfieldOfNyx extends CardImpl {
 
     private static final String rule1 = "As long as you control five or more enchantments, "
             + "each other non-Aura enchantment you control is a creature in addition to its other types "
-            + "and has base power and base toughness each equal to its converted mana cost.";
+            + "and has base power and base toughness each equal to its mana value.";
 
     private static final FilterCard filterGraveyardEnchantment
             = new FilterCard("enchantment card from your graveyard");
@@ -41,7 +42,6 @@ public final class StarfieldOfNyx extends CardImpl {
 
     static {
         filterGraveyardEnchantment.add(CardType.ENCHANTMENT.getPredicate());
-        filterGraveyardEnchantment.add(TargetController.YOU.getOwnerPredicate());
     }
 
     public StarfieldOfNyx(UUID ownerId, CardSetInfo setInfo) {
@@ -51,7 +51,7 @@ public final class StarfieldOfNyx extends CardImpl {
         // from your graveyard to the battlefield.
         Ability ability = new BeginningOfUpkeepTriggeredAbility(Zone.BATTLEFIELD,
                 new ReturnFromGraveyardToBattlefieldTargetEffect(), TargetController.YOU, true);
-        ability.addTarget(new TargetCardInGraveyard(filterGraveyardEnchantment));
+        ability.addTarget(new TargetCardInYourGraveyard(filterGraveyardEnchantment));
         this.addAbility(ability);
 
         // As long as you control five or more enchantments, each other non-Aura enchantment
@@ -87,7 +87,7 @@ public final class StarfieldOfNyx extends CardImpl {
             super(Duration.WhileOnBattlefield, Outcome.BecomeCreature);
             staticText = "Each other non-Aura enchantment you control is a creature "
                     + "in addition to its other types and has base power and "
-                    + "toughness each equal to its converted mana cost";
+                    + "toughness each equal to its mana value";
 
             this.dependendToTypes.add(DependencyType.EnchantmentAddingRemoving); // Enchanted Evening
             this.dependendToTypes.add(DependencyType.AuraAddingRemoving); // Cloudform
@@ -128,7 +128,7 @@ public final class StarfieldOfNyx extends CardImpl {
                         if (sublayer == SubLayer.SetPT_7b
                                 && permanent.isCreature()
                                 && !permanent.hasSubtype(SubType.AURA, game)) {
-                            int manaCost = permanent.getConvertedManaCost();
+                            int manaCost = permanent.getManaValue();
                             permanent.getPower().setValue(manaCost);
                             permanent.getToughness().setValue(manaCost);
                         }

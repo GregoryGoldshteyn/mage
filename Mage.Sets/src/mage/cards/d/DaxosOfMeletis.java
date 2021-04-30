@@ -60,7 +60,7 @@ class DaxosOfMeletisEffect extends OneShotEffect {
 
     public DaxosOfMeletisEffect() {
         super(Outcome.PutCreatureInPlay);
-        this.staticText = "exile the top card of that player's library. You gain life equal to that card's converted mana cost. Until end of turn, you may cast that card and you may spend mana as though it were mana of any color to cast it";
+        this.staticText = "exile the top card of that player's library. You gain life equal to that card's mana value. Until end of turn, you may cast that card and you may spend mana as though it were mana of any color to cast it";
     }
 
     public DaxosOfMeletisEffect(final DaxosOfMeletisEffect effect) {
@@ -85,12 +85,12 @@ class DaxosOfMeletisEffect extends OneShotEffect {
                     // move card to exile
                     controller.moveCardsToExile(card, source, game, true, exileId, sourceObject.getIdName());
                     // player gains life
-                    controller.gainLife(card.getConvertedManaCost(), game, source);
+                    controller.gainLife(card.getManaValue(), game, source);
                     // Add effects only if the card has a spellAbility (e.g. not for lands).
                     if (card.getSpellAbility() != null) {
                         // allow to cast the card
                         // and you may spend mana as though it were mana of any color to cast it
-                        CardUtil.makeCardPlayableAndSpendManaAsAnyColor(game, source, card, Duration.EndOfTurn);
+                        CardUtil.makeCardPlayable(game, source, card, Duration.EndOfTurn, true);
                     }
                 }
                 return true;

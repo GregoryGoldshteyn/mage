@@ -17,12 +17,11 @@ import mage.constants.*;
 import mage.counters.Counter;
 import mage.counters.Counters;
 import mage.filter.FilterMana;
+import mage.filter.predicate.mageobject.MageObjectReferencePredicate;
 import mage.game.Game;
 import mage.game.GameState;
 import mage.game.MageObjectAttribute;
 import mage.game.events.CopiedStackObjectEvent;
-import mage.game.events.CopyStackObjectEvent;
-import mage.game.events.GameEvent;
 import mage.game.events.ZoneChangeEvent;
 import mage.game.permanent.Permanent;
 import mage.game.permanent.PermanentCard;
@@ -32,6 +31,7 @@ import mage.util.CardUtil;
 import mage.util.GameLog;
 import mage.util.ManaUtil;
 import mage.util.SubTypes;
+import mage.util.functions.StackObjectCopyApplier;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -39,7 +39,7 @@ import java.util.*;
 /**
  * @author BetaSteward_at_googlemail.com
  */
-public class Spell extends StackObjImpl implements Card {
+public class Spell extends StackObjectImpl implements Card {
 
     private static final Logger logger = Logger.getLogger(Spell.class);
 
@@ -201,7 +201,7 @@ public class Spell extends StackObjImpl implements Card {
                 turnController.controlPlayersTurn(game, controller.getId());
             }
         }
-        if (this.isInstant() || this.isSorcery()) {
+        if (this.isInstantOrSorcery()) {
             int index = 0;
             result = false;
             boolean legalParts = false;
@@ -403,8 +403,8 @@ public class Spell extends StackObjImpl implements Card {
 
     @Override
     public void counter(Ability source, Game game, Zone zone, boolean owner, ZoneDetail zoneDetail) {
-        // source can be null for fizzled spells, found only one place with that usage -- Rebound Ability:
-        // event.getSourceId().equals(source.getSourceId())
+        // source can be null for fizzled spells, don't use that code in your ZONE_CHANGE watchers/triggers:
+        // event.getSourceId().equals
         // TODO: so later it must be replaced to another technics with non null source
         UUID counteringSourceId = (source == null ? null : source.getSourceId());
         this.countered = true;
@@ -622,7 +622,7 @@ public class Spell extends StackObjImpl implements Card {
      * @return
      */
     @Override
-    public int getConvertedManaCost() {
+    public int getManaValue() {
         int cmc = 0;
         if (faceDown) {
             return 0;
@@ -630,7 +630,7 @@ public class Spell extends StackObjImpl implements Card {
         for (SpellAbility spellAbility : spellAbilities) {
             cmc += spellAbility.getConvertedXManaCost(getCard());
         }
-        cmc += getCard().getManaCost().convertedManaCost();
+        cmc += getCard().getManaCost().manaValue();
         return cmc;
     }
 
@@ -766,8 +766,31 @@ public class Spell extends StackObjImpl implements Card {
         return new Spell(this);
     }
 
-    public Spell copySpell(UUID newController, Game game) {
-        Spell spellCopy = new Spell(this.card, this.ability.copySpell(), this.controllerId, this.fromZone, game);
+    /**
+     * Copy current spell on stack, but do not put copy back to stack (you can modify and put it later)
+     * <p>
+     * Warning, don't forget to call CopyStackObjectEvent and CopiedStackObjectEvent before and after copy
+     * CopyStackObjectEvent can change new copies amount, see Twinning Staff
+     * <p>
+     * Warning, don't forget to call spell.setZone before push to stack
+     *
+     * @param game
+     * @param newController controller of the copied spell
+     * @return
+     */
+    public Spell copySpell(Game game, Ability source, UUID newController) {
+        // copied spells must use copied cards
+        // spell can be from card's part (mdf/adventure), but you must copy FULL card
+        Card copiedMainCard = game.copyCard(this.card.getMainCard(), source, newController);
+        // find copied part
+        Map<UUID, MageObject> mapOldToNew = CardUtil.getOriginalToCopiedPartsMap(this.card.getMainCard(), copiedMainCard);
+        if (!mapOldToNew.containsKey(this.card.getId())) {
+            throw new IllegalStateException("Can't find card id after main card copy: " + copiedMainCard.getName());
+        }
+        Card copiedPart = (Card) mapOldToNew.get(this.card.getId());
+
+        // copy spell
+        Spell spellCopy = new Spell(copiedPart, this.ability.copySpell(this.card, copiedPart), this.controllerId, this.fromZone, game);
         boolean firstDone = false;
         for (SpellAbility spellAbility : this.getSpellAbilities()) {
             if (!firstDone) {
@@ -939,6 +962,12 @@ public class Spell extends StackObjImpl implements Card {
         this.copyFrom = (copyFrom != null ? copyFrom.copy() : null);
     }
 
+    /**
+     * Game processing a copies as normal cards, so you don't need to check spell's copy for move/exile.
+     * Use this only in exceptional situations or to skip unaffected code/choices.
+     *
+     * @return
+     */
     @Override
     public boolean isCopy() {
         return this.copy;
@@ -1006,6 +1035,7 @@ public class Spell extends StackObjImpl implements Card {
     @Override
     public void setZone(Zone zone, Game game) {
         card.setZone(zone, game);
+        game.getState().setZone(this.getId(), zone);
     }
 
     @Override
@@ -1027,27 +1057,19 @@ public class Spell extends StackObjImpl implements Card {
     }
 
     @Override
-    public StackObject createCopyOnStack(Game game, Ability source, UUID newControllerId, boolean chooseNewTargets) {
-        return createCopyOnStack(game, source, newControllerId, chooseNewTargets, 1);
-    }
-
-    @Override
-    public StackObject createCopyOnStack(Game game, Ability source, UUID newControllerId, boolean chooseNewTargets, int amount) {
-        Spell spellCopy = null;
-        GameEvent gameEvent = new CopyStackObjectEvent(source, this, newControllerId, amount);
-        if (game.replaceEvent(gameEvent)) {
-            return null;
+    public void createSingleCopy(UUID newControllerId, StackObjectCopyApplier applier, MageObjectReferencePredicate predicate, Game game, Ability source, boolean chooseNewTargets) {
+        Spell spellCopy = this.copySpell(game, source, newControllerId);
+        if (applier != null) {
+            applier.modifySpell(spellCopy, game);
         }
-        for (int i = 0; i < gameEvent.getAmount(); i++) {
-            spellCopy = this.copySpell(newControllerId, game);
-            game.getState().setZone(spellCopy.getId(), Zone.STACK); // required for targeting ex: Nivmagus Elemental
-            game.getStack().push(spellCopy);
-            if (chooseNewTargets) {
-                spellCopy.chooseNewTargets(game, newControllerId);
-            }
-            game.fireEvent(new CopiedStackObjectEvent(this, spellCopy, newControllerId));
+        spellCopy.setZone(Zone.STACK, game);  // required for targeting ex: Nivmagus Elemental
+        game.getStack().push(spellCopy);
+        if (predicate != null) {
+            spellCopy.chooseNewTargets(game, newControllerId, true, false, predicate);
+        } else if (chooseNewTargets || applier != null) { // if applier is non-null but predicate is null then it's extra
+            spellCopy.chooseNewTargets(game, newControllerId);
         }
-        return spellCopy;
+        game.fireEvent(new CopiedStackObjectEvent(this, spellCopy, newControllerId));
     }
 
     @Override
@@ -1101,4 +1123,8 @@ public class Spell extends StackObjImpl implements Card {
         throw new UnsupportedOperationException("Spells should not loose all abilities. Check if this operation is correct.");
     }
 
+    @Override
+    public String toString() {
+        return ability.toString();
+    }
 }

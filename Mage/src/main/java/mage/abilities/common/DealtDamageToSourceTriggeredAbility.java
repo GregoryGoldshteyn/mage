@@ -5,7 +5,7 @@ import mage.abilities.TriggeredAbilityImpl;
 import mage.abilities.effects.Effect;
 import mage.constants.Zone;
 import mage.game.Game;
-import mage.game.events.DamagedCreatureEvent;
+import mage.game.events.DamagedEvent;
 import mage.game.events.GameEvent;
 
 /**
@@ -46,21 +46,19 @@ public class DealtDamageToSourceTriggeredAbility extends TriggeredAbilityImpl {
 
     @Override
     public boolean checkEventType(GameEvent event, Game game) {
-        return event.getType() == GameEvent.EventType.DAMAGED_CREATURE || event.getType() == GameEvent.EventType.COMBAT_DAMAGE_STEP_POST;
+        return event.getType() == GameEvent.EventType.DAMAGED_PERMANENT || event.getType() == GameEvent.EventType.COMBAT_DAMAGE_STEP_POST;
     }
 
     @Override
     public boolean checkTrigger(GameEvent event, Game game) {
-        if (event.getType() == GameEvent.EventType.DAMAGED_CREATURE && event.getTargetId().equals(getSourceId())) {
+        if (event.getType() == GameEvent.EventType.DAMAGED_PERMANENT && event.getTargetId().equals(getSourceId())) {
             if (useValue) {
 //              TODO: this ability should only trigger once for multiple creatures dealing combat damage.  
 //              If the damaged creature uses the amount (e.g. Boros Reckoner), this will still trigger separately instead of all at once
-                for (Effect effect : this.getEffects()) {
-                    effect.setValue("damage", event.getAmount());
-                }
+                getEffects().setValue("damage", event.getAmount());
                 return true;
             } else {
-                if (((DamagedCreatureEvent) event).isCombatDamage()) {
+                if (((DamagedEvent) event).isCombatDamage()) {
                     if (!usedForCombatDamageStep) {
                         usedForCombatDamageStep = true;
                         return true;

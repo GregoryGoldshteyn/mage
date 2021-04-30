@@ -54,7 +54,7 @@ enum OboshThePreypiercerCompanionCondition implements CompanionCondition {
 
     @Override
     public String getRule() {
-        return "Your starting deck contains only cards with odd converted mana costs and land cards.";
+        return "Your starting deck contains only cards with odd mana values and land cards.";
     }
 
     @Override
@@ -62,7 +62,7 @@ enum OboshThePreypiercerCompanionCondition implements CompanionCondition {
         return deck
                 .stream()
                 .filter(card -> !card.isLand())
-                .mapToInt(MageObject::getConvertedManaCost)
+                .mapToInt(MageObject::getManaValue)
                 .map(i -> i % 2)
                 .allMatch(i -> i == 1);
     }
@@ -72,7 +72,7 @@ class OboshThePreypiercerEffect extends ReplacementEffectImpl {
 
     OboshThePreypiercerEffect() {
         super(Duration.WhileOnBattlefield, Outcome.Damage);
-        staticText = "If a source you control with an odd converted mana cost would deal damage " +
+        staticText = "If a source you control with an odd mana value would deal damage " +
                 "to a permanent or player, it deals double that damage to that permanent or player instead.";
     }
 
@@ -88,15 +88,14 @@ class OboshThePreypiercerEffect extends ReplacementEffectImpl {
     @Override
     public boolean checksEventType(GameEvent event, Game game) {
         return event.getType().equals(GameEvent.EventType.DAMAGE_PLAYER)
-                || event.getType().equals(GameEvent.EventType.DAMAGE_CREATURE)
-                || event.getType().equals(GameEvent.EventType.DAMAGE_PLANESWALKER);
+                || event.getType().equals(GameEvent.EventType.DAMAGED_PERMANENT);
     }
 
     @Override
     public boolean applies(GameEvent event, Ability source, Game game) {
         MageObject sourceObject = game.getObject(event.getSourceId());
         return sourceObject != null
-                && sourceObject.getConvertedManaCost() % 2 == 1
+                && sourceObject.getManaValue() % 2 == 1
                 && game.getControllerId(event.getSourceId()).equals(source.getControllerId());
     }
 

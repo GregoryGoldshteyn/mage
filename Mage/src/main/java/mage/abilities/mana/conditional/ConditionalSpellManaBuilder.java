@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mage.abilities.mana.conditional;
 
 import mage.ConditionalMana;
@@ -78,7 +73,7 @@ class SpellCastManaCondition extends ManaCondition implements Condition {
                 } else if (object instanceof Commander) {
                     spell = new Spell(((Commander) object).getSourceObject(), (SpellAbility) source, source.getControllerId(), game.getState().getZone(source.getSourceId()), game);
                 }
-                return spell != null && filter.match(spell, source.getSourceId(), source.getControllerId(), game);
+                return filter.match(spell, source.getSourceId(), source.getControllerId(), game);
             }
         }
         return false;

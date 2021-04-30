@@ -30,7 +30,7 @@ public class GenericManaCost extends ManaCostImpl {
     }
 
     @Override
-    public int convertedManaCost() {
+    public int manaValue() {
         return mana;
     }
 
@@ -75,5 +75,4 @@ public class GenericManaCost extends ManaCostImpl {
     public boolean containsColor(ColoredManaSymbol coloredManaSymbol) {
         return false;
     }
-
 }

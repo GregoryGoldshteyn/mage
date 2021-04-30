@@ -53,7 +53,7 @@ public class CardInfo {
     @DatabaseField
     protected String startingLoyalty;
     @DatabaseField
-    protected int convertedManaCost;
+    protected int manaValue;
     @DatabaseField(dataType = DataType.ENUM_STRING)
     protected Rarity rarity;
     @DatabaseField
@@ -126,7 +126,7 @@ public class CardInfo {
         this.className = card.getClass().getCanonicalName();
         this.power = card.getPower().toString();
         this.toughness = card.getToughness().toString();
-        this.convertedManaCost = card.getConvertedManaCost();
+        this.manaValue = card.getManaValue();
         this.rarity = card.getRarity();
         this.splitCard = card instanceof SplitCard;
         this.splitCardFuse = card.getSpellAbility() != null && card.getSpellAbility().getSpellAbilityType() == SpellAbilityType.SPLIT_FUSED;
@@ -167,19 +167,19 @@ public class CardInfo {
 
         // mana cost can contains multiple cards (split left/right, modal double faces, card/adventure)
         if (card instanceof SplitCard) {
-            List<String> manaCostLeft = ((SplitCard) card).getLeftHalfCard().getManaCost().getSymbols();
-            List<String> manaCostRight = ((SplitCard) card).getRightHalfCard().getManaCost().getSymbols();
+            List<String> manaCostLeft = ((SplitCard) card).getLeftHalfCard().getManaCostSymbols();
+            List<String> manaCostRight = ((SplitCard) card).getRightHalfCard().getManaCostSymbols();
             this.setManaCosts(CardUtil.concatManaSymbols(SPLIT_MANA_SEPARATOR_FULL, manaCostLeft, manaCostRight));
         } else if (card instanceof ModalDoubleFacesCard) {
-            List<String> manaCostLeft = ((ModalDoubleFacesCard) card).getLeftHalfCard().getManaCost().getSymbols();
-            List<String> manaCostRight = ((ModalDoubleFacesCard) card).getRightHalfCard().getManaCost().getSymbols();
+            List<String> manaCostLeft = ((ModalDoubleFacesCard) card).getLeftHalfCard().getManaCostSymbols();
+            List<String> manaCostRight = ((ModalDoubleFacesCard) card).getRightHalfCard().getManaCostSymbols();
             this.setManaCosts(CardUtil.concatManaSymbols(SPLIT_MANA_SEPARATOR_FULL, manaCostLeft, manaCostRight));
         } else if (card instanceof AdventureCard) {
-            List<String> manaCostLeft = ((AdventureCard) card).getSpellCard().getManaCost().getSymbols();
-            List<String> manaCostRight = card.getManaCost().getSymbols();
+            List<String> manaCostLeft = ((AdventureCard) card).getSpellCard().getManaCostSymbols();
+            List<String> manaCostRight = card.getManaCostSymbols();
             this.setManaCosts(CardUtil.concatManaSymbols(SPLIT_MANA_SEPARATOR_FULL, manaCostLeft, manaCostRight));
         } else {
-            this.setManaCosts(card.getManaCost().getSymbols());
+            this.setManaCosts(card.getManaCostSymbols());
         }
 
         int length = 0;
@@ -293,7 +293,7 @@ public class CardInfo {
         return sb.toString();
     }
 
-    private List<String> parseList(String list, ManaCostSide manaCostSide) {
+    public static List<String> parseList(String list, ManaCostSide manaCostSide) {
         if (list.isEmpty()) {
             return Collections.emptyList();
         }
@@ -335,8 +335,8 @@ public class CardInfo {
         this.types = sb.toString();
     }
 
-    public int getConvertedManaCost() {
-        return convertedManaCost;
+    public int getManaValue() {
+        return manaValue;
     }
 
     public final List<String> getManaCosts(ManaCostSide manaCostSide) {

@@ -186,7 +186,7 @@ class UrzaAcademyHeadmasterRandomEffect extends OneShotEffect {
                                 break;
                             case 11: // KARN LIBERATED 1
                                 sb.append("Target player exiles a card from their hand.");
-                                effects.add(new ExileFromZoneTargetEffect(Zone.HAND, null, "", new FilterCard()));
+                                effects.add(new ExileFromZoneTargetEffect(Zone.HAND, true));
                                 target = new TargetPlayer();
                                 break;
                             case 12: // NISSA SAGE ANIMIST 1
@@ -286,7 +286,7 @@ class UrzaAcademyHeadmasterRandomEffect extends OneShotEffect {
                                 effects.add(new RevealLibraryPutIntoHandEffect(5, filter3, Zone.LIBRARY));
                                 break;
                             case 12: // (altered) LILIANA VESS 2
-                                sb.append("Search your library for a card and put that card into your hand. Then shuffle your library.");
+                                sb.append("Search your library for a card and put that card into your hand. Then shuffle.");
                                 effects.add(new SearchLibraryPutInHandEffect(new TargetCardInLibrary(new FilterCard("a card")), false, true));
                                 break;
                             case 13: // (double) LILIANA OF THE VEIL 2

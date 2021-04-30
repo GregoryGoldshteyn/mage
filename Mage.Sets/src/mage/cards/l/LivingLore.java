@@ -100,7 +100,7 @@ class LivingLoreSetPowerToughnessSourceEffect extends ContinuousEffectImpl {
 
     public LivingLoreSetPowerToughnessSourceEffect() {
         super(Duration.Custom, Layer.PTChangingEffects_7, SubLayer.SetPT_7b, Outcome.BoostCreature);
-        staticText = "{this}'s power and toughness are each equal to the exiled card's converted mana cost";
+        staticText = "{this}'s power and toughness are each equal to the exiled card's mana value";
     }
 
     public LivingLoreSetPowerToughnessSourceEffect(final LivingLoreSetPowerToughnessSourceEffect effect) {
@@ -135,7 +135,7 @@ class LivingLoreSetPowerToughnessSourceEffect extends ContinuousEffectImpl {
                 break;
             }
             if (exiledCard != null) {
-                int value = exiledCard.getConvertedManaCost();
+                int value = exiledCard.getManaValue();
                 permanent.getPower().setValue(value);
                 permanent.getToughness().setValue(value);
             }
@@ -183,7 +183,7 @@ class LivingLoreSacrificeEffect extends OneShotEffect {
                             }
                         }
                         if (exiledCard != null) {
-                            if (exiledCard.getSpellAbility().canChooseTarget(game)) {
+                            if (exiledCard.getSpellAbility().canChooseTarget(game, controller.getId())) {
                                 game.getState().setValue("PlayFromNotOwnHandZone" + exiledCard.getId(), Boolean.TRUE);
                                 controller.cast(controller.chooseAbilityForCast(exiledCard, game, true),
                                         game, true, new ApprovingObject(source, game));

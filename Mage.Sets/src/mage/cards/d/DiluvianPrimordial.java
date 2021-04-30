@@ -13,10 +13,9 @@ import mage.cards.CardSetInfo;
 import mage.constants.*;
 import mage.filter.FilterCard;
 import mage.filter.predicate.Predicates;
-import mage.filter.predicate.other.OwnerIdPredicate;
+import mage.filter.predicate.card.OwnerIdPredicate;
 import mage.game.Game;
 import mage.game.events.GameEvent;
-import mage.game.events.GameEvent.EventType;
 import mage.game.events.ZoneChangeEvent;
 import mage.players.Player;
 import mage.target.Target;
@@ -88,7 +87,7 @@ class DiluvianPrimordialEffect extends OneShotEffect {
         super(Outcome.PlayForFree);
         this.staticText = "for each opponent, you may cast up to one target "
                 + "instant or sorcery card from that player's graveyard without "
-                + "paying its mana cost. If a card cast this way would be put "
+                + "paying its mana cost. If a spell cast this way would be put "
                 + "into a graveyard this turn, exile it instead";
     }
 

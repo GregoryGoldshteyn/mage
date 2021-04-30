@@ -9,6 +9,7 @@ import mage.cards.repository.CardInfo;
 import mage.cards.repository.CardScanner;
 import mage.constants.CardType;
 import mage.constants.Rarity;
+import mage.constants.SubType;
 import mage.sets.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -335,6 +336,7 @@ public class BoosterGenerationTest extends MageTestBase {
         boolean foundVale = false;
         boolean foundMDFC = false;
         boolean foundNoMDFC = false;
+
         for (int i = 1; i <= 100; i++) {
             List<Card> booster = Kaldheim.getInstance().createBooster();
 
@@ -413,5 +415,95 @@ public class BoosterGenerationTest extends MageTestBase {
         assertTrue("No booster contained Shimmerdrift Vale", foundVale);
         assertTrue("No booster contained an MDFC", foundMDFC);
         assertTrue("Every booster contained an MDFC", foundNoMDFC);
+    }
+
+    @Test
+    public void testTimeSpiralRemastered_BonusSheet() {
+        for (int i = 1; i <= 5; i++) {
+            List<Card> booster = TimeSpiralRemastered.getInstance().createBooster();
+
+            assertFalse(
+                    "Booster should have no basic lands:" + str(booster),
+                    contains(booster, basics, null)
+            );
+
+            assertEquals(
+                    "Booster should have 10 commons", 10,
+                    booster.stream().map(Card::getRarity).filter(Rarity.COMMON::equals).count()
+            );
+            assertEquals(
+                    "Booster should have 3 uncommons", 3,
+                    booster.stream().map(Card::getRarity).filter(Rarity.UNCOMMON::equals).count()
+            );
+            assertEquals(
+                    "Booster should have 1 rare/mythic", 1,
+                    booster.stream().map(Card::getRarity).filter(r -> r == Rarity.RARE || r == Rarity.MYTHIC).count()
+            );
+            assertEquals(
+                    "Booster should have 1 bonus card", 1,
+                    booster.stream().map(Card::getRarity).filter(Rarity.SPECIAL::equals).count()
+            );
+        }
+    }
+
+    @Test
+    public void testStrixhavenSchoolOfMages_LessonsAndArchive() {
+        boolean foundUncommonLesson = false;
+        boolean foundNoUncommonLesson = false;
+
+        for (int i = 1; i <= 100; i++) {
+            List<Card> booster = StrixhavenSchoolOfMages.getInstance().createBooster();
+            List<Card> nonLessons = booster
+                    .stream()
+                    .filter(c -> "STX".equals(c.getExpansionSetCode()))
+                    .filter(c -> !c.hasSubtype(SubType.LESSON, null))
+                    .collect(Collectors.toList());
+            List<Card> lessons = booster
+                    .stream()
+                    .filter(c -> "STX".equals(c.getExpansionSetCode()))
+                    .filter(c -> c.hasSubtype(SubType.LESSON, null))
+                    .collect(Collectors.toList());
+
+            assertEquals("Booster should have 15 cards", 15, booster.size());
+
+            assertFalse(
+                    "Booster should have no basic lands:" + str(booster),
+                    contains(booster, basics, null)
+            );
+
+            assertEquals(
+                    "Booster should have 9 non-Lesson commons", 9,
+                    nonLessons.stream().map(Card::getRarity).filter(Rarity.COMMON::equals).count()
+            );
+            assertEquals(
+                    "Booster should have 3 uncommons", 3,
+                    booster.stream().filter(c -> "STX".equals(c.getExpansionSetCode())).map(Card::getRarity).filter(Rarity.UNCOMMON::equals).count()
+            );
+            assertEquals(
+                    "Booster should have 1 non-Lesson rare/mythic", 1,
+                    nonLessons.stream().map(Card::getRarity).filter(r -> r == Rarity.RARE || r == Rarity.MYTHIC).count()
+            );
+
+            assertEquals(
+                    "Booster should have 1 Mystical Archive card", 1,
+                    booster.stream().map(Card::getExpansionSetCode).filter("STA"::equals).count()
+            );
+
+            assertTrue("Booster should have no more than 2 total Lessons", lessons.size() <= 2);
+            assertEquals(
+                    "Booster should have 1 non-uncommon Lesson", 1,
+                    lessons.stream().filter(c -> c.getRarity() != Rarity.UNCOMMON).count()
+            );
+            long uncommonLessonCount = lessons.stream().filter(c -> c.getRarity() == Rarity.UNCOMMON).count();
+            assertTrue("Booster should have no more than 1 uncommon Lesson", uncommonLessonCount <= 1);
+
+            foundUncommonLesson |= uncommonLessonCount > 0;
+            foundNoUncommonLesson |= uncommonLessonCount == 0;
+            if (foundUncommonLesson && foundNoUncommonLesson && i > 20) {
+                break;
+            }
+        }
+        assertTrue("No booster contained an uncommon Lesson", foundUncommonLesson);
+        assertTrue("Every booster contained an uncommon Lesson", foundNoUncommonLesson);
     }
 }

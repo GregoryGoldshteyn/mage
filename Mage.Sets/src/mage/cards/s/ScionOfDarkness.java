@@ -13,7 +13,7 @@ import mage.constants.CardType;
 import mage.constants.SubType;
 import mage.constants.Zone;
 import mage.filter.FilterCard;
-import mage.filter.predicate.other.OwnerIdPredicate;
+import mage.filter.predicate.card.OwnerIdPredicate;
 import mage.game.Game;
 import mage.game.events.DamagedPlayerEvent;
 import mage.game.events.GameEvent;
@@ -95,6 +95,6 @@ class ScionOfDarknessTriggeredAbility extends TriggeredAbilityImpl {
     public String getRule() {
         return "Whenever {this} deals combat damage to a player, "
                 + "you may put target creature card from that player's "
-                + "graveyard onto the battlefield under your control";
+                + "graveyard onto the battlefield under your control.";
     }
 }

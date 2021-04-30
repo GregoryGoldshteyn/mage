@@ -121,7 +121,7 @@ class ReidaneGodOfTheWorthyCostEffect extends CostModificationEffectImpl {
 
     ReidaneGodOfTheWorthyCostEffect() {
         super(Duration.WhileOnBattlefield, Outcome.Benefit, CostModificationType.INCREASE_COST);
-        staticText = "Noncreature spells your opponents cast with converted mana cost 4 or greater cost {2} more to cast";
+        staticText = "Noncreature spells your opponents cast with mana value 4 or greater cost {2} more to cast";
     }
 
     private ReidaneGodOfTheWorthyCostEffect(ReidaneGodOfTheWorthyCostEffect effect) {
@@ -142,7 +142,7 @@ class ReidaneGodOfTheWorthyCostEffect extends CostModificationEffectImpl {
             return false;
         }
         Card spellCard = ((SpellAbility) abilityToModify).getCharacteristics(game);
-        return spellCard != null && !spellCard.isCreature() && spellCard.getConvertedManaCost() >= 4;
+        return spellCard != null && !spellCard.isCreature() && spellCard.getManaValue() >= 4;
     }
 
     @Override
@@ -175,8 +175,7 @@ class ValkmiraProtectorsShieldPreventionEffect extends PreventionEffectImpl {
                 return isOpponent
                         && source.isControlledBy(event.getTargetId())
                         && super.applies(event, source, game);
-            case DAMAGE_CREATURE:
-            case DAMAGE_PLANESWALKER:
+            case DAMAGE_PERMANENT:
                 isOpponent = game.getOpponents(game.getControllerId(event.getSourceId())).contains(source.getControllerId());
                 Permanent permanent = game.getPermanent(event.getTargetId());
                 return isOpponent

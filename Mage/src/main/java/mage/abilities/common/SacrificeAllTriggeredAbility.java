@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mage.abilities.common;
 
 import mage.abilities.TriggeredAbilityImpl;
@@ -63,7 +58,7 @@ public class SacrificeAllTriggeredAbility extends TriggeredAbilityImpl {
                 break;
         }
         Permanent sacrificedPermanent = game.getPermanentOrLKIBattlefield(event.getTargetId());
-        return sacrificed && sacrificedPermanent != null && filter.match(sacrificedPermanent, getSourceId(), getControllerId(), game);
+        return sacrificed && filter.match(sacrificedPermanent, getSourceId(), getControllerId(), game);
     }
 
     @Override

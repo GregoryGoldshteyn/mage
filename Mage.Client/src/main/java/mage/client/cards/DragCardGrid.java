@@ -435,7 +435,7 @@ public class DragCardGrid extends JPanel implements DragCardSource, DragCardTarg
     public enum Sort {
         NONE("No Sort", new CardViewNoneComparator()),
         CARD_TYPE("Card Type", new CardViewCardTypeComparator()),
-        CMC("Converted Mana Cost", new CardViewCostComparator()),
+        CMC("Mana Value", new CardViewCostComparator()),
         COLOR("Color", new CardViewColorComparator()),
         COLOR_IDENTITY("Color Identity", new CardViewColorIdentityComparator()),
         RARITY("Rarity", new CardViewRarityComparator()),
@@ -1398,11 +1398,7 @@ public class DragCardGrid extends JPanel implements DragCardSource, DragCardTarg
                         }
                         // Casting cost
                         if (!s) {
-                            String mc = "";
-                            for (String m : card.getManaCost()) {
-                                mc += m;
-                            }
-                            s |= mc.toLowerCase(Locale.ENGLISH).contains(searchStr);
+                            s |= card.getManaCostStr().toLowerCase(Locale.ENGLISH).contains(searchStr);
                         }
                         // Rules
                         if (!s) {
@@ -1473,16 +1469,13 @@ public class DragCardGrid extends JPanel implements DragCardSource, DragCardTarg
                     }
 
                     // Mana Cost
-                    String mc = "";
-                    for (String m : card.getManaCost()) {
-                        mc += m;
-                    }
+                    String mc = card.getManaCostStr();
                     mc = mc.replaceAll("\\{([WUBRG]).([WUBRG])\\}", "{$1}{$2}");
                     mc = mc.replaceAll("\\{", "#");
                     mc = mc.replaceAll("#2\\/", "#");
                     mc = mc.replaceAll("p}", "}");
                     mc = mc.toLowerCase(Locale.ENGLISH);
-                    int cmc = card.getConvertedManaCost();
+                    int cmc = card.getManaValue();
 
                     // Do colorless mana pips
                     Pattern regex = Pattern.compile("#([0-9]+)}");

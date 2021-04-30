@@ -298,6 +298,11 @@ public abstract class CardTestPlayerAPIImpl extends MageTestPlayerBase implement
                 (maxTurn > this.stopOnTurn) || (maxTurn == this.stopOnTurn && maxPhase > this.stopAtStep.getIndex()));
 
         if (!currentGame.isPaused()) {
+            // workaround to fill range info (cause real range fills after game start, but some cheated cards needs range on ETB)
+            for (Player player : currentGame.getPlayers().values()) {
+                player.updateRange(currentGame);
+            }
+            // add cards to game
             for (Player player : currentGame.getPlayers().values()) {
                 TestPlayer testPlayer = (TestPlayer) player;
                 currentGame.cheat(testPlayer.getId(), getCommands(testPlayer));
@@ -581,6 +586,7 @@ public abstract class CardTestPlayerAPIImpl extends MageTestPlayerBase implement
      *
      * @param player {@link Player} to remove all cards from hand.
      */
+    @Deprecated // TODO: remove, cause test games don't use starting draws
     public void removeAllCardsFromHand(TestPlayer player) {
         getCommands(player).put(Zone.HAND, "clear");
     }
@@ -1349,6 +1355,25 @@ public abstract class CardTestPlayerAPIImpl extends MageTestPlayerBase implement
     }
 
     /**
+     * Assert card subtype in exile.
+     *
+     * @param cardName Name of the card.
+     * @param subType    Expected subtype.
+     */
+    public void assertExiledCardSubtype(String cardName, SubType subType) throws AssertionError {
+        boolean found = false;
+        for (ExileZone exile : currentGame.getExile().getExileZones()) {
+            for (Card card : exile.getCards(currentGame)) {
+                if(CardUtil.haveSameNames(card.getName(), cardName, true) && card.hasSubtype(subType, currentGame)){
+                    found = true;
+                }
+            }
+        }
+
+        Assert.assertTrue("There is no card named " + cardName + " found in exile, with subtype " + subType, found);
+    }
+
+    /**
      * Assert card count in exile.
      *
      * @param cardName Name of the cards that should be counted.
@@ -1566,9 +1591,9 @@ public abstract class CardTestPlayerAPIImpl extends MageTestPlayerBase implement
     }
 
     /**
-     * AI play one PRIORITY with multi game simulations (calcs and play ONE best
-     * action, can be called with stack) All choices must be made by AI
-     * (e.g.strict mode possible)
+     * AI play one PRIORITY with multi game simulations like real game
+     * (calcs and play ONE best action, can be called with stack)
+     * All choices must be made by AI (e.g.strict mode possible)
      *
      * @param turnNum
      * @param step
@@ -1590,11 +1615,11 @@ public abstract class CardTestPlayerAPIImpl extends MageTestPlayerBase implement
     }
 
     public PlayerAction createAIPlayerAction(int turnNum, PhaseStep step, String aiCommand) {
-        // AI actions must disable and enable strict mode
+        // AI commands must disable and enable real game simulation and strict mode
         return new PlayerAction("", turnNum, step, AI_PREFIX + aiCommand) {
             @Override
             public void onActionRemovedLater(Game game, TestPlayer player) {
-                player.setAICanChooseInStrictMode(false);
+                player.setAIRealGameSimulation(false);
             }
         };
     }
@@ -1899,6 +1924,20 @@ public abstract class CardTestPlayerAPIImpl extends MageTestPlayerBase implement
     public void setChoice(TestPlayer player, String choice, int timesToChoose) {
         for (int i = 0; i < timesToChoose; i++) {
             player.addChoice(choice);
+        }
+    }
+
+    /**
+     * Setup amount choices.
+     *
+     * Multi amount choices uses WUBRG order (so use 1,2,3,4,5 values list)
+     *
+     * @param player
+     * @param amountList
+     */
+    public void setChoiceAmount(TestPlayer player, int... amountList) {
+        for (int amount : amountList) {
+            setChoice(player, "X=" + amount);
         }
     }
 

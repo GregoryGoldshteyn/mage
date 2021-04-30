@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mage.cards.f;
 
 import java.util.UUID;
@@ -42,7 +37,7 @@ class ForcedMarchEffect extends OneShotEffect {
 
     public ForcedMarchEffect() {
         super(Outcome.DestroyPermanent);
-        staticText = "Destroy all creatures with converted mana cost X or less";
+        staticText = "Destroy all creatures with mana value X or less";
     }
 
     public ForcedMarchEffect(final ForcedMarchEffect effect) {
@@ -62,7 +57,7 @@ class ForcedMarchEffect extends OneShotEffect {
                 source.getControllerId(),
                 source.getSourceId(),
                 game)) {
-            if (permanent.getConvertedManaCost() <= source.getManaCostsToPay().getX()) {
+            if (permanent.getManaValue() <= source.getManaCostsToPay().getX()) {
                 permanent.destroy(source, game, false);
             }
         }

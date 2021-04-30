@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mage.target.targetpointer;
 
 import mage.MageObject;
@@ -14,10 +9,7 @@ import mage.constants.Zone;
 import mage.game.Game;
 import mage.game.permanent.Permanent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author LevelX2
@@ -63,6 +55,13 @@ public class FixedTargets extends TargetPointerImpl {
             MageObjectReference mor = new MageObjectReference(card.getId(), card.getZoneChangeCounter(game), game);
             targets.add(mor);
         }
+        this.initialized = true;
+    }
+
+    public FixedTargets(Collection<MageObjectReference> morSet, Game game) {
+        super();
+
+        targets.addAll(morSet);
         this.initialized = true;
     }
 

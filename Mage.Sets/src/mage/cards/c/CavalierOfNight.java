@@ -19,8 +19,8 @@ import mage.filter.FilterCard;
 import mage.filter.common.FilterControlledCreaturePermanent;
 import mage.filter.common.FilterControlledPermanent;
 import mage.filter.common.FilterCreatureCard;
-import mage.filter.predicate.mageobject.ConvertedManaCostPredicate;
-import mage.filter.predicate.permanent.AnotherPredicate;
+import mage.filter.predicate.mageobject.ManaValuePredicate;
+import mage.filter.predicate.mageobject.AnotherPredicate;
 import mage.target.common.TargetCardInYourGraveyard;
 import mage.target.common.TargetControlledPermanent;
 import mage.target.common.TargetOpponentsCreaturePermanent;
@@ -35,11 +35,11 @@ public final class CavalierOfNight extends CardImpl {
     private static final FilterControlledPermanent filter
             = new FilterControlledCreaturePermanent("another creature");
     private static final FilterCard filter2
-            = new FilterCreatureCard("creature card with converted mana cost 3 or less from your graveyard");
+            = new FilterCreatureCard("creature card with mana value 3 or less from your graveyard");
 
     static {
         filter.add(AnotherPredicate.instance);
-        filter2.add(new ConvertedManaCostPredicate(ComparisonType.FEWER_THAN, 4));
+        filter2.add(new ManaValuePredicate(ComparisonType.FEWER_THAN, 4));
     }
 
     public CavalierOfNight(UUID ownerId, CardSetInfo setInfo) {

@@ -15,8 +15,8 @@ import mage.constants.SubType;
 import mage.constants.Zone;
 import mage.filter.FilterPermanent;
 import mage.game.Game;
+import mage.game.events.DamageEvent;
 import mage.game.events.GameEvent;
-import mage.game.events.DamageCreatureEvent;
 import mage.game.permanent.Permanent;
 
 /**
@@ -73,14 +73,14 @@ class CamelEffect extends PreventionEffectImpl {
 
     @Override
     public boolean applies(GameEvent event, Ability source, Game game) {
-        if (super.applies(event, source, game) && event instanceof DamageCreatureEvent && event.getAmount() > 0) {
-            DamageCreatureEvent damageEvent = (DamageCreatureEvent) event;
+        if (super.applies(event, source, game) && event instanceof DamageEvent && event.getAmount() > 0) {
+            DamageEvent damageEvent = (DamageEvent) event;
             Permanent sourcePermanent = game.getPermanentOrLKIBattlefield(source.getSourceId());
             if (sourcePermanent != null 
                     && sourcePermanent.isAttacking()
                     && (event.getTargetId().equals(source.getSourceId()) || sourcePermanent.getBandedCards().contains(event.getTargetId()))) {
                 Permanent permanent = game.getPermanentOrLKIBattlefield(damageEvent.getSourceId());
-                if (permanent != null && filter.match(permanent, game)) {
+                if (filter.match(permanent, game)) {
                     return true;
                 }
             }

@@ -43,7 +43,7 @@ class CaravanVigilEffect extends OneShotEffect {
 
     public CaravanVigilEffect() {
         super(Outcome.PutLandInPlay);
-        this.staticText = "Search your library for a basic land card, reveal it, put it into your hand, then shuffle your library.<br>"
+        this.staticText = "Search your library for a basic land card, reveal it, put it into your hand, then shuffle.<br>"
                 + "<i>Morbid</i> &mdash; You may put that card onto the battlefield instead of putting it into your hand if a creature died this turn";
     }
 
@@ -67,7 +67,7 @@ class CaravanVigilEffect extends OneShotEffect {
                 if (card != null) {
                     Cards cards = new CardsImpl(card);
                     if (MorbidCondition.instance.apply(game, source)
-                            && controller.chooseUse(Outcome.PutLandInPlay, "Do you wish to put the card onto the battlefield instead?", source, game)) {
+                            && controller.chooseUse(Outcome.PutLandInPlay, "Put the card onto the battlefield instead?", source, game)) {
                         controller.moveCards(card, Zone.BATTLEFIELD, source, game);
                     } else {
                         controller.moveCards(card, Zone.HAND, source, game);

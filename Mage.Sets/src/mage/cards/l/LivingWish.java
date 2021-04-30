@@ -16,7 +16,7 @@ import mage.filter.predicate.Predicates;
  */
 public final class LivingWish extends CardImpl {
 
-    private static final FilterCard filter = new FilterCard("creature or land card");
+    private static final FilterCard filter = new FilterCard("a creature or land card");
 
     static {
         filter.add(Predicates.or(
@@ -31,7 +31,7 @@ public final class LivingWish extends CardImpl {
         this.getSpellAbility().addEffect(new WishEffect(filter));
 
         // Exile Living Wish.
-        this.getSpellAbility().addEffect(ExileSpellEffect.getInstance());
+        this.getSpellAbility().addEffect(new ExileSpellEffect());
     }
 
     private LivingWish(final LivingWish card) {

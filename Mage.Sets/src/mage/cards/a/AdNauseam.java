@@ -40,7 +40,7 @@ class AdNauseamEffect extends OneShotEffect {
 
     public AdNauseamEffect() {
         super(Outcome.DrawCard);
-        this.staticText = "Reveal the top card of your library and put that card into your hand. You lose life equal to its converted mana cost. You may repeat this process any number of times";
+        this.staticText = "Reveal the top card of your library and put that card into your hand. You lose life equal to its mana value. You may repeat this process any number of times";
     }
 
     public AdNauseamEffect(final AdNauseamEffect effect) {
@@ -54,7 +54,7 @@ class AdNauseamEffect extends OneShotEffect {
 
     @Override
     public boolean apply(Game game, Ability source) {
-        String message = "Reveal the top card of your library and put that card into your hand? You lose life equal to its converted mana cost.";
+        String message = "Reveal the top card of your library and put that card into your hand? You lose life equal to its mana value.";
         Card sourceCard = game.getCard(source.getSourceId());
         Player controller = game.getPlayer(source.getControllerId());
         if (controller == null || sourceCard == null) {
@@ -66,14 +66,14 @@ class AdNauseamEffect extends OneShotEffect {
                 break;
             }
             controller.moveCards(card, Zone.HAND, source, game);
-            int cmc = card.getConvertedManaCost();
+            int cmc = card.getManaValue();
             if (cmc > 0) {
                 controller.loseLife(cmc, game, source, false);
             }
             controller.revealCards(sourceCard.getIdName() + " put into hand", new CardsImpl(card), game);
 
             // AI workaround to stop infinite choose (only one card allows)
-            if (!controller.isHuman() && !controller.isTestMode()) {
+            if (controller.isComputer()) {
                 break;
             }
         }

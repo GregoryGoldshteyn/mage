@@ -31,7 +31,7 @@ public final class KaervekTheMerciless extends CardImpl {
         this.toughness = new MageInt(4);
 
         // Whenever an opponent casts a spell, Kaervek the Merciless deals damage to any target equal to that spell's converted mana cost.
-        Ability ability = new SpellCastOpponentTriggeredAbility(Zone.BATTLEFIELD, new KaervekTheMercilessEffect(), StaticFilters.FILTER_SPELL, false, SetTargetPointer.SPELL);
+        Ability ability = new SpellCastOpponentTriggeredAbility(Zone.BATTLEFIELD, new KaervekTheMercilessEffect(), StaticFilters.FILTER_SPELL_A, false, SetTargetPointer.SPELL);
         ability.addTarget(new TargetAnyTarget());
         this.addAbility(ability);
 
@@ -51,7 +51,7 @@ class KaervekTheMercilessEffect extends OneShotEffect {
 
     public KaervekTheMercilessEffect() {
         super(Outcome.Benefit);
-        this.staticText = "{this} deals damage to any target equal to that spell's converted mana cost";
+        this.staticText = "{this} deals damage to any target equal to that spell's mana value";
     }
 
     public KaervekTheMercilessEffect(final KaervekTheMercilessEffect effect) {
@@ -67,7 +67,7 @@ class KaervekTheMercilessEffect extends OneShotEffect {
     public boolean apply(Game game, Ability source) {
         Spell spell = game.getSpellOrLKIStack(this.getTargetPointer().getFirst(game, source));
         if (spell != null) {
-            int cost = spell.getConvertedManaCost();
+            int cost = spell.getManaValue();
             Player target = game.getPlayer(source.getFirstTarget());
             if (target != null) {
                 target.damage(cost, source.getSourceId(), source, game);

@@ -90,7 +90,7 @@ public class RandomPlayer extends ComputerPlayer {
                 }
             }
             if (!ability.getManaCosts().getVariableCosts().isEmpty()) {
-                int amount = getAvailableManaProducers(game).size() - ability.getManaCosts().convertedManaCost();
+                int amount = getAvailableManaProducers(game).size() - ability.getManaCosts().manaValue();
                 if (amount > 0) {
                     ability = ability.copy();
                     ability.getManaCostsToPay().add(new GenericManaCost(RandomUtil.nextInt(amount)));
@@ -123,7 +123,7 @@ public class RandomPlayer extends ComputerPlayer {
 
     @Override
     public boolean triggerAbility(TriggeredAbility source, Game game) {
-        if (source != null && source.canChooseTarget(game)) {
+        if (source != null && source.canChooseTarget(game, playerId)) {
             Ability ability;
             List<Ability> options = getPlayableOptions(source, game);
             if (options.isEmpty()) {

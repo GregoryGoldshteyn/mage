@@ -20,9 +20,9 @@ import mage.abilities.text.TextPart;
 import mage.cards.Card;
 import mage.cards.FrameStyle;
 import mage.constants.*;
+import mage.filter.predicate.mageobject.MageObjectReferencePredicate;
 import mage.game.Game;
 import mage.game.events.CopiedStackObjectEvent;
-import mage.game.events.CopyStackObjectEvent;
 import mage.game.events.GameEvent;
 import mage.game.events.ZoneChangeEvent;
 import mage.game.permanent.Permanent;
@@ -32,6 +32,7 @@ import mage.target.Targets;
 import mage.target.targetadjustment.TargetAdjuster;
 import mage.util.GameLog;
 import mage.util.SubTypes;
+import mage.util.functions.StackObjectCopyApplier;
 import mage.watchers.Watcher;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ import java.util.UUID;
 /**
  * @author BetaSteward_at_googlemail.com
  */
-public class StackAbility extends StackObjImpl implements Ability {
+public class StackAbility extends StackObjectImpl implements Ability {
 
     private static final ArrayList<CardType> emptyCardType = new ArrayList<>();
     private static final List<String> emptyString = new ArrayList<>();
@@ -223,6 +224,11 @@ public class StackAbility extends StackObjImpl implements Ability {
     }
 
     @Override
+    public List<String> getManaCostSymbols() {
+        return super.getManaCostSymbols();
+    }
+
+    @Override
     public MageInt getPower() {
         return MageInt.EmptyMageInt;
     }
@@ -267,7 +273,7 @@ public class StackAbility extends StackObjImpl implements Ability {
     }
 
     @Override
-    public int getConvertedManaCost() {
+    public int getManaValue() {
         // Activated abilities have an "activation cost" but they don't have a characteristic related to that while on the stack.
         // There are certain effects that interact with the cost to activate an ability (e.g., Training Grounds, Power Artifact)
         // but nothing that looks for that quality of an ability once it's on the stack.
@@ -435,8 +441,8 @@ public class StackAbility extends StackObjImpl implements Ability {
     }
 
     @Override
-    public boolean canChooseTarget(Game game) {
-        return ability.canChooseTarget(game);
+    public boolean canChooseTarget(Game game, UUID playerId) {
+        return ability.canChooseTarget(game, playerId);
     }
 
     @Override
@@ -591,32 +597,17 @@ public class StackAbility extends StackObjImpl implements Ability {
     }
 
     @Override
-    public StackObject createCopyOnStack(Game game, Ability source, UUID newControllerId, boolean chooseNewTargets) {
-        return createCopyOnStack(game, source, newControllerId, chooseNewTargets, 1);
-    }
-
-    public StackObject createCopyOnStack(Game game, Ability source, UUID newControllerId, boolean chooseNewTargets, int amount) {
-        StackAbility newStackAbility = null;
-        GameEvent gameEvent = new CopyStackObjectEvent(source, this, newControllerId, amount);
-        if (game.replaceEvent(gameEvent)) {
-            return null;
+    public void createSingleCopy(UUID newControllerId, StackObjectCopyApplier applier, MageObjectReferencePredicate predicate, Game game, Ability source, boolean chooseNewTargets) {
+        Ability newAbility = this.copy();
+        newAbility.newId();
+        StackAbility newStackAbility = new StackAbility(newAbility, newControllerId);
+        game.getStack().push(newStackAbility);
+        if (predicate != null) {
+            newStackAbility.chooseNewTargets(game, newControllerId, true, false, predicate);
+        } else if (chooseNewTargets || applier != null) { // if applier is non-null but predicate is null then it's extra
+            newStackAbility.chooseNewTargets(game, newControllerId);
         }
-        for (int i = 0; i < gameEvent.getAmount(); i++) {
-            Ability newAbility = this.copy();
-            newAbility.newId();
-            newStackAbility = new StackAbility(newAbility, newControllerId);
-            game.getStack().push(newStackAbility);
-            if (chooseNewTargets && !newAbility.getTargets().isEmpty()) {
-                Player controller = game.getPlayer(newControllerId);
-                Outcome outcome = newAbility.getEffects().getOutcome(newAbility);
-                if (controller.chooseUse(outcome, "Choose new targets?", source, game)) {
-                    newAbility.getTargets().clearChosen();
-                    newAbility.getTargets().chooseTargets(outcome, newControllerId, newAbility, false, game, false);
-                }
-            }
-            game.fireEvent(new CopiedStackObjectEvent(this, newStackAbility, newControllerId));
-        }
-        return newStackAbility;
+        game.fireEvent(new CopiedStackObjectEvent(this, newStackAbility, newControllerId));
     }
 
     @Override

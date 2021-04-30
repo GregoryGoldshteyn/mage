@@ -1,12 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mage.abilities.effects.common.search;
 
-import java.util.List;
-import java.util.UUID;
 import mage.abilities.Ability;
 import mage.abilities.effects.SearchEffect;
 import mage.cards.CardsImpl;
@@ -16,8 +9,10 @@ import mage.game.Game;
 import mage.players.Player;
 import mage.target.common.TargetCardInLibrary;
 
+import java.util.List;
+import java.util.UUID;
+
 /**
- *
  * @author LevelX2
  */
 public class SearchLibraryPutInPlayTargetPlayerEffect extends SearchEffect {
@@ -96,17 +91,17 @@ public class SearchLibraryPutInPlayTargetPlayerEffect extends SearchEffect {
             } else {
                 sb.append("up to ").append(target.getMaxNumberOfTargets()).append(' ');
             }
-            sb.append(target.getTargetName()).append(" and put them onto the battlefield");
+            sb.append(target.getTargetName()).append(", puts them onto the battlefield");
         } else {
-            sb.append("a ").append(target.getTargetName()).append(" and put it onto the battlefield");
+            sb.append("a ").append(target.getTargetName()).append(", puts it onto the battlefield");
         }
         if (tapped) {
             sb.append(" tapped");
         }
         if (forceShuffle) {
-            sb.append(". Then that player shuffles their library");
+            sb.append(", then shuffles");
         } else {
-            sb.append(". If that player does, they shuffle their library");
+            sb.append(". If that player does, they shuffle");
         }
         staticText = sb.toString();
     }

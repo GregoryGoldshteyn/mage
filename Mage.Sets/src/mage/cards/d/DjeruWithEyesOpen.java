@@ -49,7 +49,7 @@ public final class DjeruWithEyesOpen extends CardImpl {
 
         // When Djeru, With Eyes Open enters the battlefield, you may search your library for a planeswalker card, reveal it, put it into your hand, then shuffle your library.
         Effect effect = new SearchLibraryPutInHandEffect(new TargetCardInLibrary(0, 1, filter), true, true);
-        effect.setText("you may search your library for a planeswalker card, reveal it, put it into your hand, then shuffle your library");
+        effect.setText("you may search your library for a planeswalker card, reveal it, put it into your hand, then shuffle");
         this.addAbility(new EntersBattlefieldTriggeredAbility(effect, true));
 
         // If a source would deal damage to a planeswalker you control, prevent 1 of that damage.
@@ -84,9 +84,9 @@ class DjeruWithEyesOpenPreventEffect extends PreventionEffectImpl {
 
     @Override
     public boolean applies(GameEvent event, Ability source, Game game) {
-        if (event.getType() == GameEvent.EventType.DAMAGE_PLANESWALKER) {
+        if (event.getType() == GameEvent.EventType.DAMAGE_PERMANENT) {
             Permanent permanent = game.getPermanent(event.getTargetId());
-            if (permanent != null && permanent.isControlledBy(source.getControllerId())) {
+            if (permanent != null && permanent.isPlaneswalker() && permanent.isControlledBy(source.getControllerId())) {
                 return super.applies(event, source, game);
             }
         }

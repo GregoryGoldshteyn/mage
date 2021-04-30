@@ -17,7 +17,7 @@ import mage.filter.FilterPermanent;
 import mage.filter.common.FilterAttackingCreature;
 import mage.filter.predicate.Predicates;
 import mage.filter.predicate.mageobject.NamePredicate;
-import mage.filter.predicate.permanent.AnotherPredicate;
+import mage.filter.predicate.mageobject.AnotherPredicate;
 import mage.game.Game;
 import mage.players.Player;
 import mage.target.common.TargetCardInLibrary;
@@ -69,7 +69,7 @@ class AlpineHoundmasterEffect extends OneShotEffect {
     AlpineHoundmasterEffect() {
         super(Outcome.Benefit);
         staticText = "search your library for a card named Alpine Watchdog and/or a card named Igneous Cur, " +
-                "reveal them, put them into your hand, then shuffle your library";
+                "reveal them, put them into your hand, then shuffle";
     }
 
     private AlpineHoundmasterEffect(final AlpineHoundmasterEffect effect) {

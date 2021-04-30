@@ -1,20 +1,18 @@
-
 package mage.cards.r;
 
-import java.util.UUID;
-import mage.MageItem;
+import mage.MageObjectReference;
 import mage.abilities.Ability;
-import mage.abilities.Mode;
+import mage.abilities.AbilityImpl;
 import mage.abilities.effects.common.CopySpellForEachItCouldTargetEffect;
 import mage.cards.CardImpl;
 import mage.cards.CardSetInfo;
 import mage.constants.CardType;
-import mage.filter.FilterInPlay;
 import mage.filter.FilterSpell;
+import mage.filter.StaticFilters;
 import mage.filter.common.FilterInstantOrSorcerySpell;
-import mage.filter.common.FilterPermanentOrPlayer;
 import mage.filter.predicate.ObjectPlayer;
 import mage.filter.predicate.ObjectPlayerPredicate;
+import mage.filter.predicate.mageobject.MageObjectReferencePredicate;
 import mage.game.Game;
 import mage.game.stack.Spell;
 import mage.game.stack.StackObject;
@@ -23,21 +21,24 @@ import mage.target.Target;
 import mage.target.TargetSpell;
 import mage.util.TargetAddress;
 
+import java.util.*;
+
 /**
  * @author duncant
  */
 public final class Radiate extends CardImpl {
 
-    protected static final FilterSpell filter = new FilterInstantOrSorcerySpell();
+    protected static final FilterSpell filter = new FilterInstantOrSorcerySpell(
+            "instant or sorcery spell that targets only a single permanent or player"
+    );
 
     static {
-        filter.add(new SpellWithOnlySingleTargetPredicate());
-        filter.add(new SpellWithOnlyPermanentOrPlayerTargetsPredicate());
-        filter.setMessage("instant or sorcery spell that targets only a single permanent or player");
+        filter.add(SpellWithOnlySingleTargetPredicate.instance);
+        filter.add(SpellWithOnlyPermanentOrPlayerTargetsPredicate.instance);
     }
 
     public Radiate(UUID ownerId, CardSetInfo setInfo) {
-        super(ownerId,setInfo,new CardType[]{CardType.INSTANT},"{3}{R}{R}");
+        super(ownerId, setInfo, new CardType[]{CardType.INSTANT}, "{3}{R}{R}");
 
         // Choose target instant or sorcery spell that targets only a single permanent or player. Copy that spell for each other permanent or player the spell could target. Each copy targets a different one of those permanents and players.
         this.getSpellAbility().addEffect(new RadiateEffect());
@@ -54,7 +55,8 @@ public final class Radiate extends CardImpl {
     }
 }
 
-class SpellWithOnlySingleTargetPredicate implements ObjectPlayerPredicate<ObjectPlayer<Spell>> {
+enum SpellWithOnlySingleTargetPredicate implements ObjectPlayerPredicate<ObjectPlayer<Spell>> {
+    instance;
 
     @Override
     public boolean apply(ObjectPlayer<Spell> input, Game game) {
@@ -77,7 +79,8 @@ class SpellWithOnlySingleTargetPredicate implements ObjectPlayerPredicate<Object
     }
 }
 
-class SpellWithOnlyPermanentOrPlayerTargetsPredicate implements ObjectPlayerPredicate<ObjectPlayer<Spell>> {
+enum SpellWithOnlyPermanentOrPlayerTargetsPredicate implements ObjectPlayerPredicate<ObjectPlayer<Spell>> {
+    instance;
 
     @Override
     public boolean apply(ObjectPlayer<Spell> input, Game game) {
@@ -98,23 +101,17 @@ class SpellWithOnlyPermanentOrPlayerTargetsPredicate implements ObjectPlayerPred
     }
 }
 
-class RadiateEffect extends CopySpellForEachItCouldTargetEffect<MageItem> {
+class RadiateEffect extends CopySpellForEachItCouldTargetEffect {
 
-    public RadiateEffect() {
-        this(new FilterPermanentOrPlayer());
+    RadiateEffect() {
+        super();
+        staticText = "Choose target instant or sorcery spell that targets only a single permanent or player. " +
+                "Copy that spell for each other permanent or player the spell could target. " +
+                "Each copy targets a different one of those permanents and players.";
     }
 
-    public RadiateEffect(RadiateEffect effect) {
+    private RadiateEffect(RadiateEffect effect) {
         super(effect);
-    }
-
-    private RadiateEffect(FilterInPlay<MageItem> filter) {
-        super(filter);
-    }
-
-    @Override
-    public String getText(Mode mode) {
-        return "Choose target instant or sorcery spell that targets only a single permanent or player. Copy that spell for each other permanent or player the spell could target. Each copy targets a different one of those permanents and players.";
     }
 
     @Override
@@ -123,22 +120,42 @@ class RadiateEffect extends CopySpellForEachItCouldTargetEffect<MageItem> {
     }
 
     @Override
-    protected Spell getSpell(Game game, Ability source) {
-        StackObject ret = game.getStack().getStackObject(targetPointer.getFirst(game, source));
-        if (ret instanceof Spell) {
-            return (Spell) ret;
-        }
-        return null;
+    protected List<MageObjectReferencePredicate> getPossibleTargets(StackObject stackObject, Player player, Ability source, Game game) {
+        List<MageObjectReferencePredicate> predicates = new ArrayList<>();
+        UUID targeted = ((Spell) stackObject)
+                .getSpellAbilities()
+                .stream()
+                .map(AbilityImpl::getTargets)
+                .flatMap(Collection::stream)
+                .map(Target::getTargets)
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .findAny()
+                .orElse(null);
+        game.getBattlefield()
+                .getActivePermanents(
+                        StaticFilters.FILTER_PERMANENT, player.getId(), source.getSourceId(), game
+                ).stream()
+                .filter(Objects::nonNull)
+                .filter(p -> !p.equals(game.getPermanent(targeted)))
+                .filter(p -> stackObject.canTarget(game, p.getId()))
+                .map(p -> new MageObjectReference(p, game))
+                .map(MageObjectReferencePredicate::new)
+                .forEach(predicates::add);
+        game.getState()
+                .getPlayersInRange(source.getControllerId(), game)
+                .stream()
+                .filter(uuid -> !uuid.equals(targeted))
+                .filter(uuid -> stackObject.canTarget(game, uuid))
+                .map(MageObjectReference::new)
+                .map(MageObjectReferencePredicate::new)
+                .forEach(predicates::add);
+        return predicates;
     }
 
     @Override
-    protected boolean changeTarget(Target target, Game game, Ability source) {
-        return true;
-    }
-
-    @Override
-    protected void modifyCopy(Spell copy, Game game, Ability source) {
-        copy.setControllerId(source.getControllerId());
+    protected Spell getStackObject(Game game, Ability source) {
+        return game.getSpell(source.getFirstTarget());
     }
 
     @Override

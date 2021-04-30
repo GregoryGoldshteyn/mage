@@ -27,10 +27,10 @@ public final class ArcBlade extends CardImpl {
         // Arc Blade deals 2 damage to any target.
         this.getSpellAbility().addEffect(new DamageTargetEffect(2));
         // Exile Arc Blade
-        this.getSpellAbility().addEffect(ExileSpellEffect.getInstance());
+        this.getSpellAbility().addEffect(new ExileSpellEffect());
         // with three time counters on it.
         Effect effect = new AddCountersSourceEffect(CounterType.TIME.createInstance(), StaticValue.get(3), false, true);
-        effect.setText("with 3 time counters on it");
+        effect.setText("with three time counters on it");
         this.getSpellAbility().addEffect(effect);
         this.getSpellAbility().addTarget(new TargetAnyTarget());
 

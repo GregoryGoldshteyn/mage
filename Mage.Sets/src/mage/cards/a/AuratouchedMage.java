@@ -12,7 +12,7 @@ import mage.constants.Outcome;
 import mage.constants.SubType;
 import mage.constants.Zone;
 import mage.filter.FilterCard;
-import mage.filter.predicate.other.AuraCardCanAttachToLKIPermanentId;
+import mage.filter.predicate.card.AuraCardCanAttachToLKIPermanentId;
 import mage.game.Game;
 import mage.game.permanent.Permanent;
 import mage.players.Player;
@@ -51,7 +51,7 @@ class AuratouchedMageEffect extends OneShotEffect {
 
     public AuratouchedMageEffect() {
         super(Outcome.BoostCreature);
-        staticText = "search your library for an Aura card that could enchant it. If {this} is still on the battlefield, put that Aura card onto the battlefield attached to it. Otherwise, reveal the Aura card and put it into your hand. Then shuffle your library.";
+        staticText = "search your library for an Aura card that could enchant it. If {this} is still on the battlefield, put that Aura card onto the battlefield attached to it. Otherwise, reveal the Aura card and put it into your hand. Then shuffle";
     }
 
     public AuratouchedMageEffect(final AuratouchedMageEffect effect) {

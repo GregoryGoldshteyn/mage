@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.mage.test.cards.single.soi;
 
 import mage.constants.PhaseStep;
@@ -30,7 +25,7 @@ public class KindlyStrangerTest extends CardTestPlayerBase {
         addCard(Zone.GRAVEYARD, playerA, "Bitterblossom", 1);
         addCard(Zone.BATTLEFIELD, playerB, "Hill Giant", 1);
         
-        activateAbility(1, PhaseStep.PRECOMBAT_MAIN, playerA, "{2}{B}");
+        activateAbility(1, PhaseStep.PRECOMBAT_MAIN, playerA, "<i>Delirium");
         addTarget(playerA, "Hill Giant");
         setStopAt(1, PhaseStep.BEGIN_COMBAT);
         execute();

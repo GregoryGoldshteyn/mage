@@ -19,8 +19,8 @@ import mage.constants.SuperType;
 import mage.filter.FilterPermanent;
 import mage.filter.common.FilterControlledPermanent;
 import mage.filter.common.FilterNonlandPermanent;
-import mage.filter.predicate.mageobject.ConvertedManaCostPredicate;
-import mage.filter.predicate.permanent.AnotherPredicate;
+import mage.filter.predicate.mageobject.ManaValuePredicate;
+import mage.filter.predicate.mageobject.AnotherPredicate;
 import mage.game.command.emblems.VraskaGolgariQueenEmblem;
 import mage.target.TargetPermanent;
 import mage.target.common.TargetControlledPermanent;
@@ -34,11 +34,11 @@ public final class VraskaGolgariQueen extends CardImpl {
     private static final FilterControlledPermanent filter1
             = new FilterControlledPermanent("another permanent");
     private static final FilterPermanent filter2
-            = new FilterNonlandPermanent("nonland permanent with converted mana cost 3 or less");
+            = new FilterNonlandPermanent("nonland permanent with mana value 3 or less");
 
     static {
         filter1.add(AnotherPredicate.instance);
-        filter2.add(new ConvertedManaCostPredicate(ComparisonType.FEWER_THAN, 4));
+        filter2.add(new ManaValuePredicate(ComparisonType.FEWER_THAN, 4));
     }
 
     public VraskaGolgariQueen(UUID ownerId, CardSetInfo setInfo) {

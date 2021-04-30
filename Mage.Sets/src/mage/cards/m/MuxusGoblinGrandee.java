@@ -15,7 +15,7 @@ import mage.cards.CardsImpl;
 import mage.constants.*;
 import mage.filter.FilterPermanent;
 import mage.filter.common.FilterControlledPermanent;
-import mage.filter.predicate.permanent.AnotherPredicate;
+import mage.filter.predicate.mageobject.AnotherPredicate;
 import mage.game.Game;
 import mage.players.Player;
 
@@ -68,7 +68,7 @@ class MuxusGoblinGrandeeEffect extends OneShotEffect {
     MuxusGoblinGrandeeEffect() {
         super(Outcome.Benefit);
         staticText = "reveal the top six cards of your library. " +
-                "Put all Goblin creature cards with converted mana cost 5 or less " +
+                "Put all Goblin creature cards with mana value 5 or less " +
                 "from among them onto the battlefield and the rest on the bottom of your library in a random order.";
     }
 
@@ -97,7 +97,7 @@ class MuxusGoblinGrandeeEffect extends OneShotEffect {
                 .forEach(card -> {
                     if (card.isCreature()
                             && card.hasSubtype(SubType.GOBLIN, game)
-                            && card.getConvertedManaCost() <= 5) {
+                            && card.getManaValue() <= 5) {
                         toBattlfield.add(card);
                     } else {
                         toBottom.add(card);

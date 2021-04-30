@@ -1,9 +1,6 @@
 
 package mage.abilities.costs.common;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import mage.abilities.Ability;
 import mage.abilities.costs.Cost;
 import mage.abilities.costs.CostImpl;
@@ -19,8 +16,11 @@ import mage.target.common.TargetCardInYourGraveyard;
 import mage.target.targetpointer.FixedTargets;
 import mage.util.CardUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 /**
- *
  * @author nantuko
  */
 public class ExileFromGraveCost extends CostImpl {
@@ -38,9 +38,7 @@ public class ExileFromGraveCost extends CostImpl {
                     + CardUtil.numberToText(target.getMaxNumberOfTargets()))
                     + ' ' + target.getTargetName();
         } else {
-            this.text = "exile "
-                    + (target.getTargetName().startsWith("card ") ? "a ":"") 
-                    + target.getTargetName();
+            this.text = "exile " + CardUtil.addArticle(target.getTargetName().replace("cards ", "card "));
         }
         if (!this.text.endsWith(" from your graveyard")) {
             this.text = this.text + " from your graveyard";
@@ -48,6 +46,12 @@ public class ExileFromGraveCost extends CostImpl {
     }
 
     public ExileFromGraveCost(TargetCardInYourGraveyard target, String text) {
+        target.setNotTarget(true);
+        this.addTarget(target);
+        this.text = text;
+    }
+
+    public ExileFromGraveCost(TargetCardInASingleGraveyard target, String text) {
         target.setNotTarget(true);
         this.addTarget(target);
         this.text = text;
