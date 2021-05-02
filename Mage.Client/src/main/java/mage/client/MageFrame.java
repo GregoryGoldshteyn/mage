@@ -60,6 +60,8 @@ import org.mage.plugins.card.info.CardInfoPaneImpl;
 import org.mage.plugins.card.utils.CardImageUtils;
 import org.mage.plugins.card.utils.impl.ImageManagerImpl;
 
+import mage.shandalar.game.ShandalarPane;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -289,7 +291,10 @@ public class MageFrame extends javax.swing.JFrame implements MageClient {
         updateMemUsageTask = new UpdateMemUsageTask(jMemUsageLabel);
 
         tablesPane = new TablesPane();
-        desktopPane.add(tablesPane, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        // desktopPane.add(tablesPane, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        shandalarPane = new ShandalarPane();
+        desktopPane.add(shandalarPane, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         addTooltipContainer();
         setBackground();
@@ -828,7 +833,8 @@ public class MageFrame extends javax.swing.JFrame implements MageClient {
             LOGGER.debug("connecting (auto): " + currentConnection.getProxyType().toString()
                     + ' ' + currentConnection.getProxyHost() + ' ' + currentConnection.getProxyPort() + ' ' + currentConnection.getProxyUsername());
             if (MageFrame.connect(currentConnection)) {
-                prepareAndShowTablesPane();
+                // prepareAndShowTablesPane();
+                prepareAndShowShandalarPane();
                 return true;
             } else {
                 showMessage("Unable connect to server: " + SessionHandler.getLastConnectError());
@@ -1163,6 +1169,10 @@ public class MageFrame extends javax.swing.JFrame implements MageClient {
         }
     }
 
+    public void prepareAndShowShandalarPane() {
+        setActive(shandalarPane);
+    }
+
     public void prepareAndShowTablesPane() {
         // Update the tables pane with the new session
         this.tablesPane.showTables();
@@ -1391,6 +1401,7 @@ public class MageFrame extends javax.swing.JFrame implements MageClient {
     private static final long serialVersionUID = -9104885239063142218L;
     private ImagePanel backgroundPane;
     private final TablesPane tablesPane;
+    private final ShandalarPane shandalarPane;
 
     public void setConnectButtonText(String status) {
         this.btnConnect.setText(status);
